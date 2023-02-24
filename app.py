@@ -1,41 +1,54 @@
-from flask import Flask, request
-import asyncio
+import asyncio, json
 
-from services.aws import AWS
+from services.aws import MyAWS
 from services.image_classification import image_classification as predict
 
-app = Flask(__name__)
+AWS_CONFIG = {}
+AWS_CONFIG['S3_KEY'] = "AKIARZBJ2UJJNGZDQO36"
+AWS_CONFIG['S3_SECRET'] = "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"
+AWS_CONFIG['S3_INPUT_BUCKET'] = "cse-546-ec3-input-bucket"
+AWS_CONFIG['S3_OUTPUT_BUCKET'] = "cse-546-ec3-output-bucket"
+AWS_CONFIG['S3_LOCATION'] = 'http://cse-546-ec3-output-bucket.s3.amazonaws.com/'
 
-aws = AWS(app)
+aws = MyAWS(AWS_CONFIG)
 s3 = aws.s3()
 sqs = aws.sqs()
 
-asyncio.get_event_loop().run_until_complete(sqs.setIntervalPolling())
+async def setIntervalPolling():
+    while True:
+        messages = sqs.poll_from_sqs()
+        for message in messages:
+            if message:
+                # gets message from request sqs queue
+                recepitHandle = message['ReceiptHandle']
+                message = json.loads(message['Body'])
+                fileName = message['FileName']
+                s3Entry = message['S3Entry']
+                print("New Message: ",fileName)
 
-@app.route('/')
-def hello_world():
-	return 'Hello World from Group : EC3!'
+                # get image object from S3 bucket
+                img_encoded = s3.getObject(s3Entry,"input")
 
-@app.route('/predict_image')
-def predict_image():
-    url = request.args.get("image_url")
-    if(url):
-        name, prediction = predict(url)
-        # s3.store(name,'({},{})'.format(name,prediction))
-        # sqs.push_to_sqs(name,prediction)
-        return {
-            "url": url,
-            "success": True,
-            "result": {
-                "name": name,
-                "prediction": prediction
-            }
-        }
-    return {
-            "url": url,
-            "success": False
-        } 
+                # get the image prediction
+                prediction = predict(img_encoded)
+                print("prediction: ",prediction)
 
+                # store results in output s3 bucket
+                try:
+                    fileName = fileName.split(".")[0]
+                except:
+                    pass
+                s3.store(fileName,'({},{})'.format(fileName,prediction),"output")
+
+                # push results to response queue
+                sqs.push_to_sqs(fileName,prediction)
+
+                # deletes from response queue
+                deleteMessageRes = sqs.sqs.delete_message(
+                                QueueUrl=sqs.request_queue_url,
+                                ReceiptHandle=recepitHandle)
+                print("deleted: ", deleteMessageRes['ResponseMetadata']['HTTPStatusCode'])
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
-	app.run()
+    asyncio.get_event_loop().run_until_complete(setIntervalPolling())
