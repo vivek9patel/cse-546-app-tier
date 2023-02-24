@@ -4,8 +4,6 @@ from services.aws import MyAWS
 from services.image_classification import image_classification as predict
 
 AWS_CONFIG = {}
-AWS_CONFIG['S3_KEY'] = "AKIARZBJ2UJJNGZDQO36"
-AWS_CONFIG['S3_SECRET'] = "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"
 AWS_CONFIG['S3_INPUT_BUCKET'] = "cse-546-ec3-input-bucket"
 AWS_CONFIG['S3_OUTPUT_BUCKET'] = "cse-546-ec3-output-bucket"
 AWS_CONFIG['S3_LOCATION'] = 'http://cse-546-ec3-output-bucket.s3.amazonaws.com/'

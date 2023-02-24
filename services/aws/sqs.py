@@ -1,6 +1,5 @@
 import boto3
 import json
-import asyncio
 
 class SQS:
     def __init__(self,config) -> None:

@@ -6,11 +6,7 @@ class S3:
 
         self.input_bucket = self.config['S3_INPUT_BUCKET']
         self.output_bucket = self.config['S3_OUTPUT_BUCKET']
-        self.client = boto3.client(
-                    "s3",
-                    aws_access_key_id=self.config['S3_KEY'],
-                    aws_secret_access_key=self.config['S3_SECRET']
-                )
+        self.client = boto3.client("s3")
     
     def store(self,key: str,str_data: str,bucket) -> None:
         bucket_name = None
