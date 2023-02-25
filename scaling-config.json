@@ -10,8 +10,8 @@
                         "Namespace": "AWS/SQS",
                         "Dimensions": [
                             {
-                                "Name": "request_queue",
-                                "Value": "response_queue"
+                                "Name": "ec3_request_queue",
+                                "Value": "ec3_request_queue"
                             }
                         ]
                     },
@@ -29,7 +29,7 @@
                         "Dimensions": [
                             {
                                 "Name": "AutoScalingGroupName",
-                                "Value": "cse-546-autoscaling-group"
+                                "Value": "ec3-app-tier-asg"
                             }
                         ]
                     },
