@@ -6,8 +6,8 @@ class SQS:
         self.config = config
 
         self.sqs = boto3.client('sqs', region_name='us-east-1')
-        self.request_queue_url = "https://sqs.us-east-1.amazonaws.com/981183274582/ec3_request_queue"
-        self.response_queue_url = "https://sqs.us-east-1.amazonaws.com/981183274582/ec3_response_queue"
+        self.request_queue_url = "https://sqs.us-east-1.amazonaws.com/125035222225/ec3_request_queue"
+        self.response_queue_url = "https://sqs.us-east-1.amazonaws.com/125035222225/ec3_response_queue"
         pass
     
     def push_to_sqs(self,name,prediction):
